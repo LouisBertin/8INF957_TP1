@@ -1,3 +1,7 @@
+package serveur;
+
+import uqac.Commande;
+
 public class ApplicationServeur {
     /**
      * prend le numéro de port, crée un SocketServer sur le port
@@ -8,8 +12,8 @@ public class ApplicationServeur {
 
     /**
      * Se met en attente de connexions des clients. Suite aux connexions, elle lit
-     * ce qui est envoyé à travers la Socket, recrée l’objet Commande envoyé par
-     * le client, et appellera traiterCommande(Commande uneCommande)
+     * ce qui est envoyé à travers la Socket, recrée l’objet uqac.Commande envoyé par
+     * le client, et appellera traiterCommande(uqac.Commande uneCommande)
      */
     public void aVosOrdres() {
         // TODO : do something
@@ -77,7 +81,7 @@ public class ApplicationServeur {
      /**
      * programme principal. Prend 4 arguments: 1) numéro de port, 2) répertoire source, 3)
      * répertoire classes, et 4) nom du fichier de traces (sortie)
-     * Cette méthode doit créer une instance de la classe ApplicationServeur, l’initialiser
+     * Cette méthode doit créer une instance de la classe serveur.ApplicationServeur, l’initialiser
      * puis appeler aVosOrdres sur cet objet
      */
     public static void main(String[] args) {

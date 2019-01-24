@@ -1,3 +1,5 @@
+package uqac;
+
 import java.util.*;
 
 /**

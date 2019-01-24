@@ -1,3 +1,5 @@
+package uqac;
+
 class Produit {
     private String cle;
     private String nom;

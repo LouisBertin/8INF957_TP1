@@ -1,3 +1,5 @@
+package uqac;
+
 import java.util.*;
 
 /**
@@ -50,7 +52,7 @@ public class Cours {
     }
 
     public String toString() {
-        String chaine = "Cours(Titre: " + titre + " <";
+        String chaine = "uqac.Cours(Titre: " + titre + " <";
         Enumeration etuds = getEtudiants();
         if (etuds.hasMoreElements()) {
             Etudiant et = (Etudiant) etuds.nextElement();
