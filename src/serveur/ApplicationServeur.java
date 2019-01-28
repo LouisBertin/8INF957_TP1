@@ -2,7 +2,13 @@ package serveur;
 
 import uqac.Commande;
 
+import java.io.File;
+import java.io.IOException;
+
 public class ApplicationServeur {
+
+    public String PROJECT_DIR = System.getProperty("user.dir");
+
     /**
      * prend le numéro de port, crée un SocketServer sur le port
      */
@@ -65,7 +71,19 @@ public class ApplicationServeur {
      * relatif par rapport au chemin des fichiers sources.
      */
     public void traiterCompilation(String cheminRelatifFichierSource) {
-        // TODO : do something
+
+        // TODO : adapter quand on aura l'objet commande
+
+        String[] chemins = Helper.splitLastPart(cheminRelatifFichierSource);
+        String output = PROJECT_DIR + "/src/serveur/classes";
+        String command = "javac -d " + output + " -g " + chemins[1];
+
+        try {
+            // compiler la classe .java en .class dans le directory output
+            Runtime.getRuntime().exec(command, null, new File(chemins[0]));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     /**
@@ -85,6 +103,7 @@ public class ApplicationServeur {
      * puis appeler aVosOrdres sur cet objet
      */
     public static void main(String[] args) {
-        // TODO : do something
+        ApplicationServeur serveur = new ApplicationServeur(8080);
+        // serveur.traiterCompilation(serveur.PROJECT_DIR + "/src/uqac/Produit.java");
     }
 }
