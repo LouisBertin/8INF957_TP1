@@ -18,10 +18,15 @@ import java.net.Socket;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import java.util.ArrayList;
+
+
 public class ApplicationServeur {
 
     private ServerSocket socket_server;
     private Socket socket;
+    Class c = null;
+    Hashtable<String, Object> objects = new Hashtable();
 
     /**
      * prend le numéro de port, crée un SocketServer sur le port
@@ -95,12 +100,15 @@ public class ApplicationServeur {
                     break;
                 case "creation":
                     // TODO : implement method
+                    traiterCreation(Class.forName(uneCommande.get1()), uneCommande.get2());
                     break;
                 case "ecriture":
                     // TODO : implement method
+                    traiterEcriture(objects.get(uneCommande.get1()), uneCommande.get2(), uneCommande.get3());
                     break;
                 case "lecture":
                     // TODO : implement method
+                    traiterLecture(objects.get(uneCommande.get1()), uneCommande.get2());
                     break;
                 case "fonction":
                     // TODO : implement method
@@ -109,34 +117,91 @@ public class ApplicationServeur {
         }
     }
 
-    /**
-     * traiterLecture : traite la lecture d’un attribut. Renvoies le résultat par le
+       /**
+     * traiterLecture : traite la lecture d'un attribut. Renvoies le résultat par le
      * socket
+     * @throws ClassNotFoundException 
+     * @throws IllegalAccessException 
+     * @throws IllegalArgumentException 
+     * @throws InstantiationException 
+     * @throws InvocationTargetException 
      */
-    public void traiterLecture(Object pointeurObjet, String attribut) {
-        // TODO : do something
+    public void traiterLecture(Object pointeurObjet, String attribut) throws IllegalArgumentException, IllegalAccessException, InvocationTargetException {
+   	 	Method [] methodes = c.getMethods();
+        Field [] champs = c.getDeclaredFields();
+        for(Field champ : champs){
+       	int mod = champ.getModifiers();
+        	if(champ.getName().equals(attribut)){
+        		if(Modifier.isPublic(mod)){
+        			champ.get(pointeurObjet);
+        		}
+        		else{
+        			char[] char_table = attribut.toCharArray();
+        			char_table[0]=Character.toUpperCase(char_table[0]);
+        			String getter = new String(char_table);
+        			getter = "get"+getter;
+        			for(Method m : methodes){
+        				if(m.getName().equals(getter)){
+        					Object r = m.invoke(pointeurObjet);
+        			        System.out.println(r);
+        				}
+        			}
+        		}
+        	}
+        		break;
+        	}
+   }
+
+    /**
+     * traiterEcriture : traite l'écriture d'un attribut. Confirmes au client que l'écriture
+     * s'est faite correctement.
+     * @throws IllegalAccessException 
+     * @throws IllegalArgumentException 
+     * @throws InvocationTargetException 
+     */
+    public void traiterEcriture(Object pointeurObjet, String attribut, Object valeur) throws IllegalArgumentException, IllegalAccessException, InvocationTargetException {
+    	 Method [] methodes = c.getMethods();
+         Field [] champs = c.getDeclaredFields();
+         for(Field champ : champs){
+        	int mod = champ.getModifiers();
+         	if(champ.getName().equals(attribut)){
+         		if(Modifier.isPublic(mod)){
+         			champ.set(pointeurObjet, valeur);
+         		}
+         		else{
+         			char[] char_table = attribut.toCharArray();
+         			char_table[0]=Character.toUpperCase(char_table[0]);
+         			String setter = new String(char_table);
+         			setter = "set"+setter;
+         			for(Method m : methodes){
+         				if(m.getName().equals(setter)){
+         					Object r = m.invoke(pointeurObjet, valeur);
+         					System.out.println(attribut+" modifié");
+         				}
+         			}
+         		}
+         	}
+         		break;
+         	}
+         
     }
 
     /**
-     * traiterEcriture : traite l’écriture d’un attribut. Confirmes au client que l’écriture
-     * s’est faite correctement.
+     * traiterCreation : traite la création d'un objet. Confirme au client que la création
+     * s'est faite correctement.
+     * @throws SecurityException 
+     * @throws NoSuchMethodException 
+     * @throws InvocationTargetException 
+     * @throws IllegalArgumentException 
+     * @throws IllegalAccessException 
+     * @throws InstantiationException 
      */
-    public void traiterEcriture(Object pointeurObjet, String attribut, Object valeur) {
-        // TODO : do something
+    public void traiterCreation(Class classeDeLobjet, String identificateur) throws NoSuchMethodException, SecurityException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+        c = classeDeLobjet;
+        Constructor cons = c.getConstructor();
+        objects.put(identificateur, cons.newInstance());
+        System.out.println("Nouvelle instance créé : "+identificateur);
     }
-
-    /**
-     * traiterCreation : traite la création d’un objet. Confirme au client que la création
-     * s’est faite correctement.
-     */
-    public void traiterCreation(Class classeDeLobjet, String identificateur) {
-        // TODO : do something
-    }
-
-    /**
-     * traiterChargement : traite le chargement d’une classe. Confirmes au client que la création
-     * s’est faite correctement.
-     */
     public void traiterChargement(String nomQualifie) {
         // TODO : do something
     }
