@@ -97,9 +97,16 @@ public class ApplicationServeur {
                     break;
                 case "creation":
                     try {
-                        Class currentClass = Class.forName(commande.get1());
-                        traiterCreation(currentClass, commande.get2());
+                        traiterCreation(Class.forName(commande.get1()), commande.get2());
                     } catch (ClassNotFoundException e) {
+                        e.printStackTrace();
+                    } catch (NoSuchMethodException e) {
+                        e.printStackTrace();
+                    } catch (InstantiationException e) {
+                        e.printStackTrace();
+                    } catch (IllegalAccessException e) {
+                        e.printStackTrace();
+                    } catch (InvocationTargetException e) {
                         e.printStackTrace();
                     }
                     break;
@@ -203,29 +210,17 @@ public class ApplicationServeur {
      *
      * @throws SecurityException
      * @throws NoSuchMethodException
+     * @throws InvocationTargetException
      * @throws IllegalArgumentException
      * @throws IllegalAccessException
      * @throws InstantiationException
      */
-    public void traiterCreation(Class classeDeLobjet, String identificateur) {
-        try {
-            for (Constructor<?> cnst : classeDeLobjet.getConstructors()) {
-                if (cnst.getParameterCount() > 0) {
-                    Constructor<?> constructor = classeDeLobjet.getConstructor(cnst.getParameterTypes());
-                    Object instance = constructor.newInstance(identificateur);
+    public void traiterCreation(Class classeDeLobjet, String identificateur) throws NoSuchMethodException, SecurityException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+        c = classeDeLobjet;
+        Constructor cons = c.getConstructor();
+        objects.put(identificateur, cons.newInstance());
 
-                    System.out.println("Instance créée : " + instance);
-                }
-            }
-        } catch (NoSuchMethodException e) {
-            e.printStackTrace();
-        } catch (InstantiationException e) {
-            e.printStackTrace();
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
-        } catch (InvocationTargetException e) {
-            e.printStackTrace();
-        }
+        System.out.println("Nouvelle instance créé : " + identificateur);
     }
 
     /**
@@ -287,20 +282,22 @@ public class ApplicationServeur {
     }
 
     /**
-     * traiterAppel : traite l’appel d’une méthode, en prenant comme argument
-     * l’objet sur lequel on effectue l’appel, le nom de la fonction à appeler,
-     * un tableau de nom de types des arguments, et un tableau d’arguments pour
-     * la fonction. Le résultat de la fonction est renvoyé par le serveur au
-     * client (ou le message que tout s’est bien passé) /** public void
-     * traiterAppel(Object pointeurObjet, String nomFonction, String[] types,
-     * Object[] valeurs) {…}
-     *
-     * /**
-     * programme principal. Prend 4 arguments: 1) numéro de port, 2) répertoire
-     * source, 3) répertoire classes, et 4) nom du fichier de traces (sortie)
-     * Cette méthode doit créer une instance de la classe
-     * serveur.ApplicationServeur, l’initialiser puis appeler aVosOrdres sur cet
-     * objet
+     * traiterAppel : traite l’appel d’une méthode, en prenant comme argument l’objet
+     * sur lequel on effectue l’appel, le nom de la fonction à appeler, un tableau de nom de
+     * types des arguments, et un tableau d’arguments pour la fonction. Le résultat de la
+     * fonction est renvoyé par le serveur au client (ou le message que tout s’est bien
+     * passé)
+     */
+     public void traiterAppel(Object pointeurObjet, String nomFonction, String[] types,
+     Object[] valeurs) {
+         // TODO : implement method
+     }
+
+     /**
+     * programme principal. Prend 4 arguments: 1) numéro de port, 2) répertoire source, 3)
+     * répertoire classes, et 4) nom du fichier de traces (sortie)
+     * Cette méthode doit créer une instance de la classe serveur.ApplicationServeur, l’initialiser
+     * puis appeler aVosOrdres sur cet objet
      */
     public static void main(String[] args) {
         ApplicationServeur serveur = new ApplicationServeur(8080);
