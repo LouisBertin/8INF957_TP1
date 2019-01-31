@@ -27,12 +27,12 @@ public class ApplicationServeur {
      * prend le numéro de port, crée un SocketServer sur le port
      */
     public ApplicationServeur(int port) {
-        try {
+/*        try {
             socket_server = new ServerSocket(port);
             aVosOrdres();
         } catch (IOException ex) {
             Logger.getLogger(ApplicationServeur.class.getName()).log(Level.SEVERE, null, ex);
-        }
+        }*/
 
     }
 
@@ -91,7 +91,11 @@ public class ApplicationServeur {
                     traiterCompilation(commande.get1());
                     break;
                 case "chargement":
-                    // TODO : implement method
+                    try {
+                        Class currentClass = Class.forName(commande.get1());
+                    } catch (ClassNotFoundException e) {
+                        e.printStackTrace();
+                    }
                     break;
                 case "creation":
                     // TODO : implement method
@@ -205,7 +209,7 @@ public class ApplicationServeur {
         /**
          * DEBUG
          */
-        Commande commande = new Commande("compilation#./src/uqac/Cours.java,./src/uqac/Etudiant.java#/classes");
-        // serveur.traiteCommande(commande);
+        Commande commande = new Commande("chargement#uqac.Cours");
+        serveur.traiteCommande(commande);
     }
 }

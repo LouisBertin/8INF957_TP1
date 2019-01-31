@@ -1,5 +1,5 @@
 compilation#./src/uqac/Cours.java,./src/uqac/Etudiant.java#/classes
-chargement#ca.uqac.registraire.uqac.Cours
+chargement#uqac.Cours
 creation#ca.uqac.registraire.uqac.Cours#8inf853
 ecriture#8inf853#titre#Architecture des applications
 lecture#8inf853#titre
