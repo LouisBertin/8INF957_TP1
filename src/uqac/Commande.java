@@ -66,6 +66,15 @@ public class Commande implements Serializable {
 	public String get2(){
 		return commandes.get(2);
 	}
+	
+	/**
+	 * Get 3 string.
+	 *
+	 * @return the string
+	 */
+	public String get3(){
+		return commandes.get(3);
+	}
 
 
 }
