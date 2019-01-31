@@ -70,5 +70,17 @@ public class Commande implements Serializable {
 		return null;
 	}
 
+	/**
+	 * Get 3 string.
+	 *
+	 * @return the string
+	 */
+	public String get3(){
+		if (commandes.size() > 3) {
+			return commandes.get(3);
+		}
+		return null;
+	}
+
 
 }

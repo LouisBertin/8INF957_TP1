@@ -1,39 +1,41 @@
 package serveur;
 
-import java.io.BufferedReader;
 import uqac.Commande;
 
 import javax.tools.JavaCompiler;
 import javax.tools.ToolProvider;
-import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.*;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
-import java.util.Arrays;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.Hashtable;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import java.util.ArrayList;
 
 public class ApplicationServeur {
 
     private ServerSocket socket_server;
     private Socket socket;
+    Class c = null;
+    Hashtable<String, Object> objects = new Hashtable();
 
     /**
      * prend le numéro de port, crée un SocketServer sur le port
      */
     public ApplicationServeur(int port) {
-/*        try {
+        try {
             socket_server = new ServerSocket(port);
             aVosOrdres();
         } catch (IOException ex) {
             Logger.getLogger(ApplicationServeur.class.getName()).log(Level.SEVERE, null, ex);
-        }*/
-
+        }
     }
 
     /**
@@ -91,20 +93,33 @@ public class ApplicationServeur {
                     traiterCompilation(commande.get1());
                     break;
                 case "chargement":
+                    traiterChargement(commande.get1());
+                    break;
+                case "creation":
                     try {
                         Class currentClass = Class.forName(commande.get1());
+                        traiterCreation(currentClass, commande.get2());
                     } catch (ClassNotFoundException e) {
                         e.printStackTrace();
                     }
                     break;
-                case "creation":
-                    // TODO : implement method
-                    break;
                 case "ecriture":
-                    // TODO : implement method
+                    try {
+                        traiterEcriture(objects.get(commande.get1()), commande.get2(), commande.get3());
+                    } catch (IllegalAccessException e) {
+                        e.printStackTrace();
+                    } catch (InvocationTargetException e) {
+                        e.printStackTrace();
+                    }
                     break;
                 case "lecture":
-                    // TODO : implement method
+                    try {
+                        traiterLecture(objects.get(commande.get1()), commande.get2());
+                    } catch (IllegalAccessException e) {
+                        e.printStackTrace();
+                    } catch (InvocationTargetException e) {
+                        e.printStackTrace();
+                    }
                     break;
                 case "fonction":
                     // TODO : implement method
@@ -116,25 +131,100 @@ public class ApplicationServeur {
     /**
      * traiterLecture : traite la lecture d’un attribut. Renvoies le résultat par le
      * socket
+     * @throws ClassNotFoundException
+     * @throws IllegalAccessException
+     * @throws IllegalArgumentException
+     * @throws InstantiationException
+     * @throws InvocationTargetException
      */
-    public void traiterLecture(Object pointeurObjet, String attribut) {
-        // TODO : do something
+    public void traiterLecture(Object pointeurObjet, String attribut) throws IllegalArgumentException, IllegalAccessException, InvocationTargetException {
+   	 	Method [] methodes = c.getMethods();
+        Field [] champs = c.getDeclaredFields();
+        for(Field champ : champs){
+       	int mod = champ.getModifiers();
+        	if(champ.getName().equals(attribut)){
+        		if(Modifier.isPublic(mod)){
+        			champ.get(pointeurObjet);
+        		}
+        		else{
+        			char[] char_table = attribut.toCharArray();
+        			char_table[0]=Character.toUpperCase(char_table[0]);
+        			String getter = new String(char_table);
+        			getter = "get"+getter;
+        			for(Method m : methodes){
+        				if(m.getName().equals(getter)){
+        					Object r = m.invoke(pointeurObjet);
+        			        System.out.println(r);
+        				}
+        			}
+        		}
+        	}
+        		break;
+        	}
+   }
+
+    /**
+     * traiterEcriture : traite l'écriture d'un attribut. Confirmes au client que l'écriture
+     * s'est faite correctement.
+     * @throws IllegalAccessException
+     * @throws IllegalArgumentException
+     * @throws InvocationTargetException
+     */
+    public void traiterEcriture(Object pointeurObjet, String attribut, Object valeur) throws IllegalArgumentException, IllegalAccessException, InvocationTargetException {
+    	 Method[] methodes = c.getMethods();
+         Field[] champs = c.getDeclaredFields();
+         for(Field champ : champs){
+        	int mod = champ.getModifiers();
+         	if(champ.getName().equals(attribut)){
+         		if(Modifier.isPublic(mod)){
+         			champ.set(pointeurObjet, valeur);
+         		}
+         		else{
+         			char[] char_table = attribut.toCharArray();
+         			char_table[0]=Character.toUpperCase(char_table[0]);
+         			String setter = new String(char_table);
+         			setter = "set"+setter;
+         			for(Method m : methodes){
+         				if(m.getName().equals(setter)){
+         					Object r = m.invoke(pointeurObjet, valeur);
+         					System.out.println(attribut+" modifié");
+         				}
+         			}
+         		}
+         	}
+         		break;
+         	}
+
     }
 
     /**
-     * traiterEcriture : traite l’écriture d’un attribut. Confirmes au client que l’écriture
-     * s’est faite correctement.
-     */
-    public void traiterEcriture(Object pointeurObjet, String attribut, Object valeur) {
-        // TODO : do something
-    }
-
-    /**
-     * traiterCreation : traite la création d’un objet. Confirme au client que la création
-     * s’est faite correctement.
+     * traiterCreation : traite la création d'un objet. Confirme au client que la création
+     * s'est faite correctement.
+     * @throws SecurityException
+     * @throws NoSuchMethodException
+     * @throws IllegalArgumentException
+     * @throws IllegalAccessException
+     * @throws InstantiationException
      */
     public void traiterCreation(Class classeDeLobjet, String identificateur) {
-        // TODO : do something
+        try {
+            for (Constructor<?> cnst : classeDeLobjet.getConstructors()) {
+                if (cnst.getParameterCount() > 0) {
+                    Constructor<?> constructor = classeDeLobjet.getConstructor(cnst.getParameterTypes());
+                    Object instance = constructor.newInstance(identificateur);
+
+                    System.out.println("Instance créée : " + instance);
+                }
+            }
+        } catch (NoSuchMethodException e) {
+            e.printStackTrace();
+        } catch (InstantiationException e) {
+            e.printStackTrace();
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        } catch (InvocationTargetException e) {
+            e.printStackTrace();
+        }
     }
 
     /**
@@ -142,7 +232,12 @@ public class ApplicationServeur {
      * s’est faite correctement.
      */
     public void traiterChargement(String nomQualifie) {
-        // TODO : do something
+        try {
+            Class currentClass = Class.forName(nomQualifie);
+            System.out.println("Classe chargée : " + currentClass);
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        }
     }
 
     /**
@@ -181,6 +276,7 @@ public class ApplicationServeur {
 
             try {
                 Files.move(Paths.get(classPath.substring(0, index) + ".class"), Paths.get("./src/serveur/classes/" + filename + ".class"), StandardCopyOption.REPLACE_EXISTING);
+                System.out.println("Classe compilée : " + filename + ".class");
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -209,7 +305,13 @@ public class ApplicationServeur {
         /**
          * DEBUG
          */
-        Commande commande = new Commande("chargement#uqac.Cours");
-        serveur.traiteCommande(commande);
+        Commande commande = new Commande("creation#uqac.Cours#8inf853");
+
+        //serveur.traiteCommande(commande);
+        //serveur.traiteCommande(new Commande("compilation#./src/uqac/Cours.java,./src/uqac/Etudiant.java#/classes"));
+        //serveur.traiteCommande(new Commande("chargement#uqac.Cours"));
+        //serveur.traiteCommande(new Commande("creation#uqac.Cours#8inf853"));
+        //serveur.traiteCommande(new Commande("ecriture#8inf853#titre#Architecture"));
+        //serveur.traiteCommande(new Commande("lecture#8inf853#titre"));
     }
 }
