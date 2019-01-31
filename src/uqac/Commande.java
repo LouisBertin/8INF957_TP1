@@ -64,7 +64,10 @@ public class Commande implements Serializable {
 	 * @return the string
 	 */
 	public String get2(){
-		return commandes.get(2);
+		if (commandes.size() > 2) {
+			return commandes.get(2);
+		}
+		return null;
 	}
 
 
