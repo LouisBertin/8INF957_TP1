@@ -70,4 +70,4 @@ $RECYCLE.BIN/
 # Windows shortcuts
 *.lnk
 
-src/serveur/classes/**.class
+src/serveur/classes/*.class
