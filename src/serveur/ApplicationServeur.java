@@ -99,16 +99,13 @@ public class ApplicationServeur {
                     // TODO : implement method
                     break;
                 case "creation":
-                    // TODO : implement method
-                    traiterCreation(Class.forName(uneCommande.get1()), uneCommande.get2());
+                    traiterCreation(Class.forName(commande.get1()), uneCommande.get2());
                     break;
                 case "ecriture":
-                    // TODO : implement method
-                    traiterEcriture(objects.get(uneCommande.get1()), uneCommande.get2(), uneCommande.get3());
+                    traiterEcriture(objects.get(commande.get1()), commande.get2(), commande.get3());
                     break;
                 case "lecture":
-                    // TODO : implement method
-                    traiterLecture(objects.get(uneCommande.get1()), uneCommande.get2());
+                    traiterLecture(objects.get(commande.get1()), commande.get2());
                     break;
                 case "fonction":
                     // TODO : implement method
@@ -271,6 +268,9 @@ public class ApplicationServeur {
          * DEBUG
          */
         Commande commande = new Commande("compilation#./src/uqac/Cours.java,./src/uqac/Etudiant.java#/classes");
-        // serveur.traiteCommande(commande);
+        //serveur.traiteCommande(commande);
+        //serveur.traiteCommande(new Commande("creation#uqac.Cours#8inf853"));
+    	//serveur.traiteCommande(new Commande("ecriture#8inf853#titre#Architecture"));
+    	//serveur.traiteCommande(new Commande("lecture#8inf853#titre"));
     }
 }
