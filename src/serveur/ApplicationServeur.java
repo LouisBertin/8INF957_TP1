@@ -1,33 +1,82 @@
 package serveur;
 
+import java.io.BufferedReader;
 import uqac.Commande;
 
 import javax.tools.JavaCompiler;
 import javax.tools.ToolProvider;
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.Arrays;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.net.ServerSocket;
+import java.net.Socket;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class ApplicationServeur {
 
-    public String PROJECT_DIR = System.getProperty("user.dir");
+    private ServerSocket socket_server;
+    private Socket socket;
 
     /**
      * prend le numéro de port, crée un SocketServer sur le port
      */
-    public ApplicationServeur (int port) {
-        // TODO : do something
+    public ApplicationServeur(int port) {
+        try {
+            socket_server = new ServerSocket(port);
+            aVosOrdres();
+        } catch (IOException ex) {
+            Logger.getLogger(ApplicationServeur.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
     }
 
     /**
-     * Se met en attente de connexions des clients. Suite aux connexions, elle lit
-     * ce qui est envoyé à travers la Socket, recrée l’objet uqac.Commande envoyé par
-     * le client, et appellera traiterCommande(uqac.Commande uneCommande)
+     * Se met en attente de connexions des clients. Suite aux connexions, elle
+     * lit ce qui est envoyé à travers la Socket, recrée l’objet uqac.Commande
+     * envoyé par le client, et appellera traiterCommande(uqac.Commande
+     * uneCommande)
      */
     public void aVosOrdres() {
-        // TODO : do something
+        Runnable run_server = new Runnable() {
+            public void run() {
+                System.out.println("Lancement du serveur...");
+                while (true) {
+                    try {
+                        socket = socket_server.accept(); // Un client se connecte on l'accepte
+
+                        System.out.println("Le Serveur a accepte la connexion d'un client");
+
+                        ObjectInputStream in = new ObjectInputStream(socket.getInputStream());
+                        Commande commande = (Commande) in.readObject();
+                        traiteCommande(commande);
+
+                        System.out.println("Le Serveur a traité la commande");
+
+                        String resultat_commande = "Test pour l'instant";
+                        ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream());
+                        out.writeObject("Le serveur renvoie le resultat de la commande :"+resultat_commande);
+                        out.flush();
+
+                        in.close();
+                        out.close();
+                        socket.close();
+                    } catch (IOException ex) {
+                        Logger.getLogger(ApplicationServeur.class.getName()).log(Level.SEVERE, null, ex);
+                    } catch (ClassNotFoundException ex) {
+                        Logger.getLogger(ApplicationServeur.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                }
+            }
+        };
+        Thread thread_server = new Thread(run_server);
+        thread_server.start();
+        System.out.println("Le serveur est prêt !");
     }
 
     /**
