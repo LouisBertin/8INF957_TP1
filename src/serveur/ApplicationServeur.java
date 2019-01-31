@@ -97,9 +97,16 @@ public class ApplicationServeur {
                     break;
                 case "creation":
                     try {
-                        Class currentClass = Class.forName(commande.get1());
-                        traiterCreation(currentClass, commande.get2());
+                        traiterCreation(Class.forName(commande.get1()), commande.get2());
                     } catch (ClassNotFoundException e) {
+                        e.printStackTrace();
+                    } catch (NoSuchMethodException e) {
+                        e.printStackTrace();
+                    } catch (InstantiationException e) {
+                        e.printStackTrace();
+                    } catch (IllegalAccessException e) {
+                        e.printStackTrace();
+                    } catch (InvocationTargetException e) {
                         e.printStackTrace();
                     }
                     break;
@@ -202,29 +209,17 @@ public class ApplicationServeur {
      * s'est faite correctement.
      * @throws SecurityException
      * @throws NoSuchMethodException
+     * @throws InvocationTargetException
      * @throws IllegalArgumentException
      * @throws IllegalAccessException
      * @throws InstantiationException
      */
-    public void traiterCreation(Class classeDeLobjet, String identificateur) {
-        try {
-            for (Constructor<?> cnst : classeDeLobjet.getConstructors()) {
-                if (cnst.getParameterCount() > 0) {
-                    Constructor<?> constructor = classeDeLobjet.getConstructor(cnst.getParameterTypes());
-                    Object instance = constructor.newInstance(identificateur);
+    public void traiterCreation(Class classeDeLobjet, String identificateur) throws NoSuchMethodException, SecurityException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+        c = classeDeLobjet;
+        Constructor cons = c.getConstructor();
+        objects.put(identificateur, cons.newInstance());
 
-                    System.out.println("Instance créée : " + instance);
-                }
-            }
-        } catch (NoSuchMethodException e) {
-            e.printStackTrace();
-        } catch (InstantiationException e) {
-            e.printStackTrace();
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
-        } catch (InvocationTargetException e) {
-            e.printStackTrace();
-        }
+        System.out.println("Nouvelle instance créé : " + identificateur);
     }
 
     /**
