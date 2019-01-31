@@ -284,9 +284,11 @@ public class ApplicationServeur {
      * types des arguments, et un tableau d’arguments pour la fonction. Le résultat de la
      * fonction est renvoyé par le serveur au client (ou le message que tout s’est bien
      * passé)
-     /**
+     */
      public void traiterAppel(Object pointeurObjet, String nomFonction, String[] types,
-     Object[] valeurs) {…}
+     Object[] valeurs) {
+         // TODO : implement method
+     }
 
      /**
      * programme principal. Prend 4 arguments: 1) numéro de port, 2) répertoire source, 3)
