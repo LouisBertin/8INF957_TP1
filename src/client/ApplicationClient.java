@@ -7,6 +7,10 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -16,8 +20,10 @@ public class ApplicationClient {
      * prend le fichier contenant la liste des commandes, et le charge dans une
      * variable du type uqac.Commande qui est retournée
      */
-    public Commande saisisCommande(BufferedReader fichier) {
-        // TODO : do something
+    public Commande saisisCommande(ArrayList<String> commandes) {
+        for(String commande : commandes){
+            System.out.println(commande);
+        }
         return null;
     }
 
@@ -25,7 +31,7 @@ public class ApplicationClient {
      * initialise : ouvre les différents fichiers de lecture et écriture
      */
     public void initialise(String fichCommandes, String fichSortie) {
-        // TODO : do something
+              
     }
 
     /**
@@ -43,9 +49,10 @@ public class ApplicationClient {
             socket = new Socket("localhost", 8080);
 
             ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream());
-            out.flush();
 
             ObjectInputStream in = new ObjectInputStream(socket.getInputStream());
+
+            System.out.println("Le serveur a cree les flux d'entrées/sorties");
 
             out.writeObject(uneCommande);
             out.flush();
@@ -55,20 +62,19 @@ public class ApplicationClient {
             Object objetRecu = in.readObject();
             String resultat = (String) objetRecu;
 
-            System.out.println("Le client a recu le resultat de la commande : " +resultat);
+            System.out.println("Le client a recu le resultat de la commande : " + resultat);
 
             in.close();
             out.close();
             socket.close();
-            
+
             return resultat;
         } catch (IOException e) {
             e.printStackTrace();
-            return null;
         } catch (ClassNotFoundException ex) {
             Logger.getLogger(ApplicationClient.class.getName()).log(Level.SEVERE, null, ex);
-            return null;
         }
+        return null;
     }
 
     /**
@@ -77,8 +83,17 @@ public class ApplicationClient {
      * saisisCommande(BufferedReader fichier) et traiteCommande(uqac.Commande
      * uneCommande).
      */
-    public void scenario() {
-        // TODO : do something
+    public void scenario(String fichCommandes) {
+        //Ouvre le fichier des commandes et récupère le texte:
+        try {
+            ArrayList<String> commandes = (ArrayList<String>) Files.readAllLines(Paths.get(fichCommandes));
+            System.out.println(commandes);
+            for(String commande : commandes){
+                traiteCommande(new Commande(commande));
+            }
+        } catch (IOException ex) {
+            Logger.getLogger(ApplicationClient.class.getName()).log(Level.SEVERE, null, ex);
+        } 
     }
 
     /**
@@ -89,5 +104,7 @@ public class ApplicationClient {
      */
     public static void main(String[] args) {
         // TODO : do something
+        ApplicationClient client = new ApplicationClient();
+        client.scenario("inputs/commandes.txt");
     }
 }
