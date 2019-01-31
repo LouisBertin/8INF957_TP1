@@ -2,8 +2,13 @@ package serveur;
 
 import uqac.Commande;
 
-import java.io.File;
+import javax.tools.JavaCompiler;
+import javax.tools.ToolProvider;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
+import java.util.Arrays;
 
 public class ApplicationServeur {
 
@@ -29,8 +34,30 @@ public class ApplicationServeur {
      * prend uneCommande dument formattée, et la traite. Dépendant du type de commande,
      * elle appelle la méthode spécialisée
      */
-    public void traiteCommande(Commande uneCommande) {
-        // TODO : do something
+    public void traiteCommande(Commande commande) {
+        if(commande instanceof Commande && commande.get0() != null) {
+            switch (commande.get0()) {
+                case "compilation":
+                    // TODO : le prof ne gère pas le troisième paramètres ? :thinking:
+                    traiterCompilation(commande.get1());
+                    break;
+                case "chargement":
+                    // TODO : implement method
+                    break;
+                case "creation":
+                    // TODO : implement method
+                    break;
+                case "ecriture":
+                    // TODO : implement method
+                    break;
+                case "lecture":
+                    // TODO : implement method
+                    break;
+                case "fonction":
+                    // TODO : implement method
+                    break;
+            }
+        }
     }
 
     /**
@@ -71,18 +98,39 @@ public class ApplicationServeur {
      * relatif par rapport au chemin des fichiers sources.
      */
     public void traiterCompilation(String cheminRelatifFichierSource) {
+        // on check si la string contient plusieurs classes à compiler
+        if (cheminRelatifFichierSource.contains(",")) {
+            String[] parts = cheminRelatifFichierSource.split(",");
+            for (int i = 0; i < parts.length; i++) {
+                compileClass(parts[i]);
+            }
+        } else {
+            compileClass(cheminRelatifFichierSource);
+        }
+    }
 
-        // TODO : adapter quand on aura l'objet commande
+    /**
+     * compile la classe Java
+     *
+     * @param classPath chemin de la classe
+     */
+    private void compileClass(String classPath) {
+        // on récupère le  compilateur Java du système
+        JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
+        // on compile
+        int result = compiler.run(null, null, null, classPath);
 
-        String[] chemins = Helper.splitLastPart(cheminRelatifFichierSource);
-        String output = PROJECT_DIR + "/src/serveur/classes";
-        String command = "javac -d " + output + " -g " + chemins[1];
+        if (result == 0) {
+            // on déplace le fichier compilé dans le répertoire cible
+            int index = classPath.lastIndexOf(".");
+            String fileWithoutExtension = classPath.substring(classPath.lastIndexOf("/"), index);
+            String filename = fileWithoutExtension.replace("/", "");
 
-        try {
-            // compiler la classe .java en .class dans le directory output
-            Runtime.getRuntime().exec(command, null, new File(chemins[0]));
-        } catch (IOException e) {
-            e.printStackTrace();
+            try {
+                Files.move(Paths.get(classPath.substring(0, index) + ".class"), Paths.get("./src/serveur/classes/" + filename + ".class"), StandardCopyOption.REPLACE_EXISTING);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
     }
 
@@ -104,6 +152,11 @@ public class ApplicationServeur {
      */
     public static void main(String[] args) {
         ApplicationServeur serveur = new ApplicationServeur(8080);
-        // serveur.traiterCompilation(serveur.PROJECT_DIR + "/src/uqac/Produit.java");
+
+        /**
+         * DEBUG
+         */
+        Commande commande = new Commande("compilation#./src/uqac/Cours.java,./src/uqac/Etudiant.java#/classes");
+        // serveur.traiteCommande(commande);
     }
 }

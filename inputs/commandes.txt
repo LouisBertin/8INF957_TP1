@@ -1,4 +1,4 @@
-compilation#./src/ca/uqac/registraire/uqac.Cours.java,./src/ca/uqac/registraire/uqac.Etudiant.java#./classes
+compilation#./src/uqac/Cours.java,./src/uqac/Etudiant.java#/classes
 chargement#ca.uqac.registraire.uqac.Cours
 creation#ca.uqac.registraire.uqac.Cours#8inf853
 ecriture#8inf853#titre#Architecture des applications
