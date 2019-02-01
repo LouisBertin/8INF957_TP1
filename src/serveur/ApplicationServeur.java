@@ -129,7 +129,54 @@ public class ApplicationServeur {
                     }
                     break;
                 case "fonction":
-                    // TODO : implement method
+                	ArrayList<String> nomTypes = new ArrayList<>();
+                	ArrayList<String> parametres = new ArrayList<>();
+                	
+        	        if(commande.get3() != null){
+        	        	
+        	        	for(String param : commande.get3().split(",")){
+        		        	nomTypes.add(param);
+        		        }
+        	        
+        		        String types [] = new String[nomTypes.size()];
+        	        	Object[] valeurs = new Object[nomTypes.size()];
+        		        
+        		        for(String s : nomTypes){
+        		        	int i = 0;
+        		        	for(String s1 : s.split(":")){
+        		        		parametres.add(s1);
+        		        		if(parametres.lastIndexOf(s1)%2 == 0){
+        		        			types[i] = s1;
+        		        		}
+        		        		else{
+        		        			valeurs[i] = s1;
+        		        			i++;
+        		        		}
+        		        		 try {
+									traiterAppel(objects.get(commande.get1()), commande.get2(), types, valeurs);
+								} catch (NoSuchMethodException
+										| SecurityException
+										| IllegalAccessException
+										| IllegalArgumentException
+										| InvocationTargetException e) {
+									// TODO Auto-generated catch block
+									e.printStackTrace();
+								}
+        		        	}
+        		        }
+        	        }
+        	        else{
+        	        	 try {
+							traiterAppel(objects.get(commande.get1()), commande.get2(), null, null);
+						} catch (NoSuchMethodException | SecurityException
+								| IllegalAccessException
+								| IllegalArgumentException
+								| InvocationTargetException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+        	        }
+        	       
                     break;
             }
         }
@@ -290,8 +337,33 @@ public class ApplicationServeur {
      */
      public void traiterAppel(Object pointeurObjet, String nomFonction, String[] types,
      Object[] valeurs) {
-         // TODO : implement method
-     }
+        Method methode = null;
+
+    	if(types == null && valeurs == null){
+    		 methode = c.getMethod(nomFonction);
+	       	 methode.invoke(pointeurObjet, valeurs);
+	       	 Object o = methode.invoke(pointeurObjet, valeurs);
+	       	 if(methode.getReturnType().getName().equals("void")){
+	       		System.out.println("La méthode a bien été réalisé");
+	       	 }else{
+	       		 System.out.println(o);
+	       	 }
+    	}else{
+        	 Class<?>[] typesClasse = new Class[types.length];
+        	 int i = 0;
+        	 for(String t : types){
+        		 typesClasse[i] = t.getClass();
+        		 i++;
+        	 }
+        	 methode = pointeurObjet.getClass().getMethod(nomFonction, typesClasse);
+        	 methode.invoke(pointeurObjet, valeurs);
+        	 Object o = methode.invoke(pointeurObjet, valeurs);
+        	 if(methode.getReturnType().getName().equals("void")){
+        		System.out.println("La méthode a bien été réalisé");
+        	 }else{
+        		 System.out.println(o);
+        	 }
+    	}     }
 
      /**
      * programme principal. Prend 4 arguments: 1) numéro de port, 2) répertoire source, 3)
