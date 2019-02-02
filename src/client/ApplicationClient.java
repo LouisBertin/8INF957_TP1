@@ -64,6 +64,15 @@ public class ApplicationClient {
             String resultat = (String) objetRecu;
             System.out.println("Le client a reçu le résultat de la commande : " + resultat);
 
+            //On sauvegarde le résultat dans un fichier txt :
+            Path orderPath = Paths.get("outputs/resultats.txt");
+            try {
+                Files.write(orderPath, resultat+System.getProperty("line.separator"), StandardOpenOption.APPEND);
+            } catch (IOException ex) {
+                Logger.getLogger(main.class.getName()).log(Level.SEVERE, null, ex);
+            }
+
+
             //On ferme les flux i/o et on ferme également la socket :
             in.close();
             out.close();
@@ -105,6 +114,15 @@ public class ApplicationClient {
      */
     public static void main(String[] args) {
         // TODO : do something
+        //On créé notre fichier de résultats :
+        Path orderPath = Paths.get("outputs/resultats.txt");
+        try {
+            Files.write(orderPath, "", StandardOpenOption.APPEND);
+        } catch (IOException ex) {
+            Logger.getLogger(main.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
+        //On lance le client et le scnéario :
         ApplicationClient client = new ApplicationClient();
         client.scenario("inputs/commandes.txt");
     }
