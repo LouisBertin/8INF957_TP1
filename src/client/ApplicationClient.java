@@ -70,10 +70,11 @@ public class ApplicationClient {
 
             //On sauvegarde le résultat dans un fichier txt :
             Path orderPath = Paths.get("outputs/resultats.txt");
+            byte[] strToBytes = resultat.getBytes();
             try {
-                Files.write(orderPath, resultat+System.getProperty("line.separator"), StandardOpenOption.APPEND);
+                Files.write(orderPath, strToBytes, StandardOpenOption.APPEND);
             } catch (IOException ex) {
-                Logger.getLogger(main.class.getName()).log(Level.SEVERE, null, ex);
+                Logger.getLogger(ApplicationClient.class.getName()).log(Level.SEVERE, null, ex);
             }
 
 
