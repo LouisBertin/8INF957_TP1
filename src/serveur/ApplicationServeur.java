@@ -33,12 +33,12 @@ public class ApplicationServeur {
      * prend le numéro de port, crée un SocketServer sur le port
      */
     public ApplicationServeur(int port) {
-/*        try {
+        try {
             socket_server = new ServerSocket(port);
             aVosOrdres();
         } catch (IOException ex) {
             Logger.getLogger(ApplicationServeur.class.getName()).log(Level.SEVERE, null, ex);
-        }*/
+        }
     }
 
     /**
@@ -179,7 +179,7 @@ public class ApplicationServeur {
                     for (Method m : methodes) {
                         if (m.getName().equals(getter)) {
                             Object r = m.invoke(pointeurObjet);
-                            System.out.println(r);
+                            resultat_commande = r.toString();
                         }
                     }
                 }
@@ -212,7 +212,7 @@ public class ApplicationServeur {
                     for (Method m : methodes) {
                         if (m.getName().equals(setter)) {
                             Object r = m.invoke(pointeurObjet, valeur);
-                            System.out.println(attribut + " modifié");
+                            resultat_commande = attribut + " modifié";
                         }
                     }
                 }
@@ -238,7 +238,7 @@ public class ApplicationServeur {
         Constructor cons = c.getConstructor();
         objects.put(identificateur, cons.newInstance());
 
-        System.out.println("Nouvelle instance créé : " + identificateur);
+        resultat_commande = "Nouvelle instance créé : " + identificateur;
     }
 
     /**
@@ -292,7 +292,7 @@ public class ApplicationServeur {
 
             try {
                 Files.move(Paths.get(classPath.substring(0, index) + ".class"), Paths.get("./src/serveur/classes/" + filename + ".class"), StandardCopyOption.REPLACE_EXISTING);
-                System.out.println("Classe compilée : " + filename + ".class");
+                resultat_commande = "Classe compilée : " + filename + ".class";
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -323,31 +323,16 @@ public class ApplicationServeur {
             }
         }
 
+        // build values objects array
         Object[] finalObjects = new Object[valeurs.length];
         for (int i = 0; i < valeurs.length; i++) {
             // deal with Class parameter
             if (valeurs[i].toString().indexOf("(") > 0) {
-                String className = valeurs[i].toString().split(":")[0];
                 String idToTrim = valeurs[i].toString().split(":")[1];
                 String id = idToTrim.substring(idToTrim.indexOf("(") + 1, idToTrim.indexOf(")"));
 
-                try {
-                    Class cl = Class.forName(className);
-                    Constructor cons = cl.getConstructor(String.class);
-                    Object o = cons.newInstance(id);
-                    finalObjects[i] = o;
-                } catch (ClassNotFoundException e) {
-                    e.printStackTrace();
-                } catch (NoSuchMethodException e) {
-                    e.printStackTrace();
-                } catch (InstantiationException e) {
-                    e.printStackTrace();
-                } catch (IllegalAccessException e) {
-                    e.printStackTrace();
-                } catch (InvocationTargetException e) {
-                    e.printStackTrace();
-                }
-
+                objects.get(id);
+                finalObjects[i] = objects.get(id);
             }
             // deal with float values
             if (valeurs[i].toString().toLowerCase().indexOf("float") != -1) {
@@ -360,8 +345,13 @@ public class ApplicationServeur {
         Object Class = objects.get(pointeurObjet);
         try {
             Method method = Class.getClass().getMethod(nomFonction, typeObjects);
-            method.invoke(Class, finalObjects);
-            resultat_commande = "Méthode invoquée!";
+            Object value = method.invoke(Class, finalObjects);
+
+            if (value == null) {
+                resultat_commande = "Méthode invoquée!";
+            } else {
+                resultat_commande = value.toString();
+            }
         } catch (NoSuchMethodException e) {
             e.printStackTrace();
         } catch (IllegalAccessException e) {
@@ -380,8 +370,13 @@ public class ApplicationServeur {
         Object Class = objects.get(pointeurObjet);
         try {
             Method method = Class.getClass().getMethod(nomFonction);
-            method.invoke(Class);
-            resultat_commande = "Méthode invoquée!";
+            Object value = method.invoke(Class);
+
+            if (value == null) {
+                resultat_commande = "Méthode invoquée!";
+            } else {
+                resultat_commande = value.toString();
+            }
         } catch (NoSuchMethodException e) {
             e.printStackTrace();
         } catch (IllegalAccessException e) {
@@ -411,8 +406,10 @@ public class ApplicationServeur {
         //serveur.traiteCommande(new Commande("creation#uqac.Cours#8inf853"));
         //serveur.traiteCommande(new Commande("ecriture#8inf853#titre#Architecture"));
         //serveur.traiteCommande(new Commande("lecture#8inf853#titre"));
-        serveur.traiteCommande(new Commande("creation#uqac.Cours#8inf853"));
-        serveur.traiteCommande(new Commande("fonction#8inf853#attributeNote#uqac.Etudiant:ID(mathilde),float:3.7"));
-        serveur.traiteCommande(new Commande("fonction#8inf853#getEtudiants"));
+        //serveur.traiteCommande(new Commande("creation#uqac.Cours#8inf853"));
+        //serveur.traiteCommande(new Commande("creation#uqac.Cours#8inf843"));
+        //serveur.traiteCommande(new Commande("fonction#8inf853#attributeNote#uqac.Etudiant:ID(mathilde),float:3.7"));
+        //serveur.traiteCommande(new Commande("fonction#8inf843#attributeNote#uqac.Etudiant:ID(mathilde),float:4.0"));
+        //serveur.traiteCommande(new Commande("fonction#mathilde#getMoyenne#"));
     }
 }

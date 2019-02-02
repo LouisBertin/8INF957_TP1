@@ -15,7 +15,7 @@ fonction#mathilde#inscrisDansCours#uqac.Cours:ID(8inf853)
 fonction#8inf853#attributeNote#uqac.Etudiant:ID(mathilde),float:3.7
 fonction#8inf853#getNote#uqac.Etudiant:ID(mathilde)
 fonction#mathilde#inscrisDansCours#uqac.Cours:ID(8inf843)
-fonction#8inf843#attributeNote#uqac.Etudiant:ID(mathilde),float:4.0@
+fonction#8inf843#attributeNote#uqac.Etudiant:ID(mathilde),float:4.0
 fonction#mathilde#getMoyenne#
 fonction#raymond#inscrisDansCours#uqac.Cours:ID(8inf853)
 fonction#raymond#inscrisDansCours#uqac.Cours:ID(8inf843)
