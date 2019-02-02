@@ -1,6 +1,7 @@
 package serveur;
 
 import uqac.Commande;
+import uqac.Etudiant;
 
 import javax.tools.JavaCompiler;
 import javax.tools.ToolProvider;
@@ -13,6 +14,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.Arrays;
 import java.util.Hashtable;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -31,12 +33,12 @@ public class ApplicationServeur {
      * prend le numéro de port, crée un SocketServer sur le port
      */
     public ApplicationServeur(int port) {
-        try {
+/*        try {
             socket_server = new ServerSocket(port);
             aVosOrdres();
         } catch (IOException ex) {
             Logger.getLogger(ApplicationServeur.class.getName()).log(Level.SEVERE, null, ex);
-        }
+        }*/
     }
 
     /**
@@ -65,7 +67,7 @@ public class ApplicationServeur {
 
                 System.out.println("Le Serveur a traité la commande et l'envoie");
 
-               
+
 
                 out.writeObject(resultat_commande);
                 out.flush();
@@ -129,54 +131,23 @@ public class ApplicationServeur {
                     }
                     break;
                 case "fonction":
-                	ArrayList<String> nomTypes = new ArrayList<>();
-                	ArrayList<String> parametres = new ArrayList<>();
-                	
-        	        if(commande.get3() != null){
-        	        	
-        	        	for(String param : commande.get3().split(",")){
-        		        	nomTypes.add(param);
-        		        }
-        	        
-        		        String types [] = new String[nomTypes.size()];
-        	        	Object[] valeurs = new Object[nomTypes.size()];
-        		        
-        		        for(String s : nomTypes){
-        		        	int i = 0;
-        		        	for(String s1 : s.split(":")){
-        		        		parametres.add(s1);
-        		        		if(parametres.lastIndexOf(s1)%2 == 0){
-        		        			types[i] = s1;
-        		        		}
-        		        		else{
-        		        			valeurs[i] = s1;
-        		        			i++;
-        		        		}
-        		        		 try {
-									traiterAppel(objects.get(commande.get1()), commande.get2(), types, valeurs);
-								} catch (NoSuchMethodException
-										| SecurityException
-										| IllegalAccessException
-										| IllegalArgumentException
-										| InvocationTargetException e) {
-									// TODO Auto-generated catch block
-									e.printStackTrace();
-								}
-        		        	}
-        		        }
-        	        }
-        	        else{
-        	        	 try {
-							traiterAppel(objects.get(commande.get1()), commande.get2(), null, null);
-						} catch (NoSuchMethodException | SecurityException
-								| IllegalAccessException
-								| IllegalArgumentException
-								| InvocationTargetException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
-						}
-        	        }
-        	       
+                    // liste de paramètre
+                    if (commande.get3() != null) {
+                        String[] parametres = commande.get3().split(",");
+                        String[] types = new String[parametres.length];
+
+                        // liste des types de paramètre
+                        int index = 0;
+                        for (String string : parametres) {
+                            types[index] = string.split(":")[0];
+                            index++;
+                        }
+
+                        traiterAppel(commande.get1(), commande.get2(), types, parametres);
+                    } else {
+                        traiterAppelSansParam(commande.get1(), commande.get2());
+                    }
+
                     break;
             }
         }
@@ -335,35 +306,90 @@ public class ApplicationServeur {
      * fonction est renvoyé par le serveur au client (ou le message que tout s’est bien
      * passé)
      */
-     public void traiterAppel(Object pointeurObjet, String nomFonction, String[] types,
-     Object[] valeurs) {
-        Method methode = null;
+    public void traiterAppel(Object pointeurObjet, String nomFonction, String[] types,
+                             Object[] valeurs) {
 
-    	if(types == null && valeurs == null){
-    		 methode = c.getMethod(nomFonction);
-	       	 methode.invoke(pointeurObjet, valeurs);
-	       	 Object o = methode.invoke(pointeurObjet, valeurs);
-	       	 if(methode.getReturnType().getName().equals("void")){
-	       		System.out.println("La méthode a bien été réalisé");
-	       	 }else{
-	       		 System.out.println(o);
-	       	 }
-    	}else{
-        	 Class<?>[] typesClasse = new Class[types.length];
-        	 int i = 0;
-        	 for(String t : types){
-        		 typesClasse[i] = t.getClass();
-        		 i++;
-        	 }
-        	 methode = pointeurObjet.getClass().getMethod(nomFonction, typesClasse);
-        	 methode.invoke(pointeurObjet, valeurs);
-        	 Object o = methode.invoke(pointeurObjet, valeurs);
-        	 if(methode.getReturnType().getName().equals("void")){
-        		System.out.println("La méthode a bien été réalisé");
-        	 }else{
-        		 System.out.println(o);
-        	 }
-    	}     }
+        // build types objects array
+        Class[] typeObjects = new Class[types.length];
+        for (int i = 0; i < types.length; i++) {
+            try {
+                if (types[i].indexOf(".") > 0) {
+                    typeObjects[i] = Class.forName(types[i]);
+                } else if (types[i].equals("float")){
+                    typeObjects[i] = float.class;
+                }
+            } catch (ClassNotFoundException e) {
+                e.printStackTrace();
+            }
+        }
+
+        Object[] finalObjects = new Object[valeurs.length];
+        for (int i = 0; i < valeurs.length; i++) {
+            // deal with Class parameter
+            if (valeurs[i].toString().indexOf("(") > 0) {
+                String className = valeurs[i].toString().split(":")[0];
+                String idToTrim = valeurs[i].toString().split(":")[1];
+                String id = idToTrim.substring(idToTrim.indexOf("(") + 1, idToTrim.indexOf(")"));
+
+                try {
+                    Class cl = Class.forName(className);
+                    Constructor cons = cl.getConstructor(String.class);
+                    Object o = cons.newInstance(id);
+                    finalObjects[i] = o;
+                } catch (ClassNotFoundException e) {
+                    e.printStackTrace();
+                } catch (NoSuchMethodException e) {
+                    e.printStackTrace();
+                } catch (InstantiationException e) {
+                    e.printStackTrace();
+                } catch (IllegalAccessException e) {
+                    e.printStackTrace();
+                } catch (InvocationTargetException e) {
+                    e.printStackTrace();
+                }
+
+            }
+            // deal with float values
+            if (valeurs[i].toString().toLowerCase().indexOf("float") != -1) {
+                float f = Float.parseFloat(valeurs[i].toString().split(":")[1]);
+                finalObjects[i] = f;
+            }
+        }
+
+        // fetch current class from HashMap
+        Object Class = objects.get(pointeurObjet);
+        try {
+            Method method = Class.getClass().getMethod(nomFonction, typeObjects);
+            method.invoke(Class, finalObjects);
+            resultat_commande = "Méthode invoquée!";
+        } catch (NoSuchMethodException e) {
+            e.printStackTrace();
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        } catch (InvocationTargetException e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * traiterAppel : sans pamètres
+     * @param pointeurObjet
+     * @param nomFonction
+     */
+    public void traiterAppelSansParam(Object pointeurObjet, String nomFonction) {
+        Object Class = objects.get(pointeurObjet);
+        try {
+            Method method = Class.getClass().getMethod(nomFonction);
+            method.invoke(Class);
+            resultat_commande = "Méthode invoquée!";
+        } catch (NoSuchMethodException e) {
+            e.printStackTrace();
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        } catch (InvocationTargetException e) {
+            e.printStackTrace();
+        }
+    }
 
      /**
      * programme principal. Prend 4 arguments: 1) numéro de port, 2) répertoire source, 3)
@@ -377,7 +403,7 @@ public class ApplicationServeur {
         /**
          * DEBUG
          */
-        Commande commande = new Commande("creation#uqac.Cours#8inf853");
+        //Commande commande = new Commande("creation#uqac.Cours#8inf853");
 
         //serveur.traiteCommande(commande);
         //serveur.traiteCommande(new Commande("compilation#./src/uqac/Cours.java,./src/uqac/Etudiant.java#/classes"));
@@ -385,5 +411,8 @@ public class ApplicationServeur {
         //serveur.traiteCommande(new Commande("creation#uqac.Cours#8inf853"));
         //serveur.traiteCommande(new Commande("ecriture#8inf853#titre#Architecture"));
         //serveur.traiteCommande(new Commande("lecture#8inf853#titre"));
+        serveur.traiteCommande(new Commande("creation#uqac.Cours#8inf853"));
+        serveur.traiteCommande(new Commande("fonction#8inf853#attributeNote#uqac.Etudiant:ID(mathilde),float:3.7"));
+        serveur.traiteCommande(new Commande("fonction#8inf853#getEtudiants"));
     }
 }
