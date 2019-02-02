@@ -10,6 +10,7 @@ import java.util.ArrayList;
 public class Commande implements Serializable {
 
 	private ArrayList<String> commandes = new ArrayList<>();
+	private String resultat;
 
 	/**
 	 * Instantiates a new Commande.
@@ -20,6 +21,7 @@ public class Commande implements Serializable {
 		for(String str : commande.split("#")){
 			commandes.add(str);
 		}
+		resultat = "";
 	}
 
 	/**
@@ -38,6 +40,24 @@ public class Commande implements Serializable {
 	 */
 	public void setCommandes(ArrayList<String> commandes) {
 		this.commandes = commandes;
+	}
+
+	/**
+	 * Set resultat commandes.
+	 *
+	 * @param resultat the commandes
+	 */
+	public void setResultatCommande(String resultat){
+		this.resultat = resultat;
+	}
+
+	/**
+	 * Get resultat_commande string.
+	 *
+	 * @return the string of resultat_commande
+	 */
+	public String getResultatCommande(){
+		return this.resultat;
 	}
 
 	/**

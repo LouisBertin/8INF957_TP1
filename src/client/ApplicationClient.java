@@ -13,6 +13,10 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 
 public class ApplicationClient {
 
@@ -31,7 +35,7 @@ public class ApplicationClient {
      * initialise : ouvre les différents fichiers de lecture et écriture
      */
     public void initialise(String fichCommandes, String fichSortie) {
-              
+
     }
 
     /**
@@ -46,24 +50,35 @@ public class ApplicationClient {
     public Object traiteCommande(Commande uneCommande) {
         Socket socket;
         try {
+            //On créé un socket pour communiquer avec le serveur sur le port 8080 :
             socket = new Socket("localhost", 8080);
 
+            //On créé les flux i/o :
             ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream());
-
             ObjectInputStream in = new ObjectInputStream(socket.getInputStream());
+            System.out.println("Le client a créé les flux d'entrées/sorties");
 
-            System.out.println("Le serveur a cree les flux d'entrées/sorties");
-
+            //On envoie la commande pour que le serveur la traite :
             out.writeObject(uneCommande);
             out.flush();
+            System.out.println("Le client a émit une commande");
 
-            System.out.println("Le Client a émit une commande");
-
+            //On récupère le résultat du serveur de la commande précédemment envoyée :
             Object objetRecu = in.readObject();
             String resultat = (String) objetRecu;
+            System.out.println("Le client a reçu le résultat de la commande : " + resultat);
 
-            System.out.println("Le client a recu le resultat de la commande : " + resultat);
+            //On sauvegarde le résultat dans un fichier txt :
+            Path orderPath = Paths.get("outputs/resultats.txt");
+            byte[] strToBytes = resultat.getBytes();
+            try {
+                Files.write(orderPath, strToBytes, StandardOpenOption.APPEND);
+            } catch (IOException ex) {
+                Logger.getLogger(ApplicationClient.class.getName()).log(Level.SEVERE, null, ex);
+            }
 
+
+            //On ferme les flux i/o et on ferme également la socket :
             in.close();
             out.close();
             socket.close();
@@ -93,7 +108,7 @@ public class ApplicationClient {
             }
         } catch (IOException ex) {
             Logger.getLogger(ApplicationClient.class.getName()).log(Level.SEVERE, null, ex);
-        } 
+        }
     }
 
     /**
@@ -104,6 +119,17 @@ public class ApplicationClient {
      */
     public static void main(String[] args) {
         // TODO : do something
+         //On créé notre fichier de résultats :
+        Path orderPath = Paths.get("outputs/resultats.txt");
+        String resultat = "";
+        byte[] strToBytes = resultat.getBytes();
+        try {
+            Files.write(orderPath, strToBytes, StandardOpenOption.APPEND);
+        } catch (IOException ex) {
+            Logger.getLogger(ApplicationClient.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
+        //On lance le client et le scnéario :
         ApplicationClient client = new ApplicationClient();
         client.scenario("inputs/commandes.txt");
     }
