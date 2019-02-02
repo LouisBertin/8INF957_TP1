@@ -25,7 +25,7 @@ public class ApplicationServeur {
 
     private ServerSocket socket_server;
     private Socket socket;
-    private String resultat_commande;
+    private String resultat_commande = "";
     Class c = null;
     Hashtable<String, Object> objects = new Hashtable();
 
@@ -66,7 +66,7 @@ public class ApplicationServeur {
                 System.out.println("Le serveur a traité la commande et l'envoie");
 
                 //On envoie le résultat de la commande traité au client :
-                commande.setResultatCommande(resultat_commande);
+                commande.setResultatCommande(resultat_commande + "\n");
                 out.writeObject(commande.getResultatCommande());
                 out.flush();
 
@@ -291,7 +291,7 @@ public class ApplicationServeur {
 
             try {
                 Files.move(Paths.get(classPath.substring(0, index) + ".class"), Paths.get("./src/serveur/classes/" + filename + ".class"), StandardCopyOption.REPLACE_EXISTING);
-                resultat_commande = "Classe compilée : " + filename + ".class";
+                resultat_commande += "Classe compilée : " + filename + ".class ";
             } catch (IOException e) {
                 e.printStackTrace();
             }

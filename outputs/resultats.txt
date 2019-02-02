@@ -1,0 +1,25 @@
+Classe compilée : Cours.class Classe compilée : Etudiant.class 
+Classe chargée : class uqac.Cours
+Nouvelle instance créé : 8inf853
+titre modifié
+Architecture des applications lu
+Nouvelle instance créé : 8inf843
+titre modifié
+Classe chargée : class uqac.Etudiant
+Nouvelle instance créé : mathilde
+nom modifié
+Nouvelle instance créé : raymond
+nom modifié
+nom modifié
+Méthode invoquée!
+Méthode invoquée!
+3.7
+Méthode invoquée!
+Méthode invoquée!
+3.85
+Méthode invoquée!
+Méthode invoquée!
+Méthode invoquée!
+Méthode invoquée!
+3.85
+uqac.Cours(Titre: Architecture des applications <Mathilde Boivin[3.85] = 3.7 , Raymond Sauve[2.85] = 3.0 >)
