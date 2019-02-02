@@ -64,7 +64,7 @@ public class ApplicationServeur {
                 System.out.println("Le serveur a traité la commande et l'envoie");
 
                 //On envoie le résultat de la commande traité au client :
-                commande.setResultatCommande(resultat_commande)
+                commande.setResultatCommande(resultat_commande);
                 out.writeObject(commande.getResultatCommande());
                 out.flush();
 
