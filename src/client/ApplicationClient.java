@@ -13,6 +13,10 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 
 public class ApplicationClient {
 
@@ -114,12 +118,14 @@ public class ApplicationClient {
      */
     public static void main(String[] args) {
         // TODO : do something
-        //On créé notre fichier de résultats :
+         //On créé notre fichier de résultats :
         Path orderPath = Paths.get("outputs/resultats.txt");
+        String resultat = "";
+        byte[] strToBytes = resultat.getBytes();
         try {
-            Files.write(orderPath, "", StandardOpenOption.APPEND);
+            Files.write(orderPath, strToBytes, StandardOpenOption.APPEND);
         } catch (IOException ex) {
-            Logger.getLogger(main.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(ApplicationClient.class.getName()).log(Level.SEVERE, null, ex);
         }
 
         //On lance le client et le scnéario :
