@@ -33,6 +33,7 @@ public class ApplicationServeur {
     public ApplicationServeur(int port) {
         try {
             socket_server = new ServerSocket(port);
+            System.out.println("Le serveur est prêt ! Port utilisé : "+port);
             aVosOrdres();
         } catch (IOException ex) {
             Logger.getLogger(ApplicationServeur.class.getName()).log(Level.SEVERE, null, ex);
@@ -46,30 +47,28 @@ public class ApplicationServeur {
      * uneCommande)
      */
     public void aVosOrdres() {
-        System.out.println("Le serveur est prêt !");
         while (true) {
             try {
-                socket = socket_server.accept(); // Un client se connecte on l'accepte
+                // Un client se connecte, on l'accepte :
+                socket = socket_server.accept();
+                System.out.println("Le serveur a accepte la connexion d'un client");
 
-                System.out.println("Le Serveur a accepte la connexion d'un client");
-
+                //On créé les flux i/o
                 ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream());
                 ObjectInputStream in = new ObjectInputStream(socket.getInputStream());
+                System.out.println("Le serveur a créé les flux d'entrées/sorties");
 
-                System.out.println("Le serveur a cree les flux d'entrées/sorties");
-
+                //On récupère l'objet Commande envoyé par le client, puis on traite la commande :
                 Commande commande = (Commande) in.readObject();
-                //System.out.println(commande.get0());
-
                 traiteCommande(commande);
+                System.out.println("Le serveur a traité la commande et l'envoie");
 
-                System.out.println("Le Serveur a traité la commande et l'envoie");
-
-               
-
-                out.writeObject(resultat_commande);
+                //On envoie le résultat de la commande traité au client :
+                commande.setResultatCommande(resultat_commande)
+                out.writeObject(commande.getResultatCommande());
                 out.flush();
 
+                //On ferme les flux i/o et on ferme également la socket :
                 in.close();
                 out.close();
                 socket.close();
@@ -131,16 +130,16 @@ public class ApplicationServeur {
                 case "fonction":
                 	ArrayList<String> nomTypes = new ArrayList<>();
                 	ArrayList<String> parametres = new ArrayList<>();
-                	
+
         	        if(commande.get3() != null){
-        	        	
+
         	        	for(String param : commande.get3().split(",")){
         		        	nomTypes.add(param);
         		        }
-        	        
+
         		        String types [] = new String[nomTypes.size()];
         	        	Object[] valeurs = new Object[nomTypes.size()];
-        		        
+
         		        for(String s : nomTypes){
         		        	int i = 0;
         		        	for(String s1 : s.split(":")){
@@ -176,7 +175,7 @@ public class ApplicationServeur {
 							e.printStackTrace();
 						}
         	        }
-        	       
+
                     break;
             }
         }
@@ -208,7 +207,8 @@ public class ApplicationServeur {
                     for (Method m : methodes) {
                         if (m.getName().equals(getter)) {
                             Object r = m.invoke(pointeurObjet);
-                            System.out.println(r);
+                            //System.out.println(r);
+                            resultat_commande = r + " lu";
                         }
                     }
                 }
@@ -241,7 +241,8 @@ public class ApplicationServeur {
                     for (Method m : methodes) {
                         if (m.getName().equals(setter)) {
                             Object r = m.invoke(pointeurObjet, valeur);
-                            System.out.println(attribut + " modifié");
+                            //System.out.println(attribut + " modifié");
+                            resultat_commande = attribut + " modifié";
                         }
                     }
                 }
@@ -267,7 +268,8 @@ public class ApplicationServeur {
         Constructor cons = c.getConstructor();
         objects.put(identificateur, cons.newInstance());
 
-        System.out.println("Nouvelle instance créé : " + identificateur);
+        //System.out.println("Nouvelle instance créé : " + identificateur);
+        resultat_commande = "Nouvelle instance créé : " + identificateur;
     }
 
     /**
@@ -321,7 +323,8 @@ public class ApplicationServeur {
 
             try {
                 Files.move(Paths.get(classPath.substring(0, index) + ".class"), Paths.get("./src/serveur/classes/" + filename + ".class"), StandardCopyOption.REPLACE_EXISTING);
-                System.out.println("Classe compilée : " + filename + ".class");
+                //System.out.println("Classe compilée : " + filename + ".class");
+                resultat_commande = "Classe compilée : " + filename + ".class";
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -344,7 +347,8 @@ public class ApplicationServeur {
 	       	 methode.invoke(pointeurObjet, valeurs);
 	       	 Object o = methode.invoke(pointeurObjet, valeurs);
 	       	 if(methode.getReturnType().getName().equals("void")){
-	       		System.out.println("La méthode a bien été réalisé");
+	       		System.out.println("La méthode a bien été réalisée");
+            resultat_commande = "La méthode a bien été réalisée";
 	       	 }else{
 	       		 System.out.println(o);
 	       	 }
@@ -359,7 +363,8 @@ public class ApplicationServeur {
         	 methode.invoke(pointeurObjet, valeurs);
         	 Object o = methode.invoke(pointeurObjet, valeurs);
         	 if(methode.getReturnType().getName().equals("void")){
-        		System.out.println("La méthode a bien été réalisé");
+        		System.out.println("La méthode a bien été réalisée");
+            resultat_commande = "La méthode a bien été réalisée";
         	 }else{
         		 System.out.println(o);
         	 }
