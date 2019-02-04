@@ -163,20 +163,28 @@ public class ApplicationServeur {
      * @throws InvocationTargetException
      */
     public void traiterLecture(Object pointeurObjet, String attribut) throws IllegalArgumentException, IllegalAccessException, InvocationTargetException {
+        //Chargement des méthodes et des attributs de la classe
         Method[] methodes = c.getMethods();
         Field[] champs = c.getDeclaredFields();
+        
+        //Recherche de l'attribut
         for (Field champ : champs) {
             int mod = champ.getModifiers();
             if (champ.getName().equals(attribut)) {
                 if (Modifier.isPublic(mod)) {
+                    //on retourne directement la valeur de l'attribut de l'objet en paramètre
                     champ.get(pointeurObjet);
                 } else {
+                    //on créé une string de type get + nom de l'attribut
                     char[] char_table = attribut.toCharArray();
                     char_table[0] = Character.toUpperCase(char_table[0]);
                     String getter = new String(char_table);
                     getter = "get" + getter;
+                    
+                    //Recherche du getter dans les méthodes de la classe
                     for (Method m : methodes) {
                         if (m.getName().equals(getter)) {
+                            //Invocation du getter pour l'objet en paramètre
                             Object r = m.invoke(pointeurObjet);
                             resultat_commande = r + " lu";
                         }
@@ -196,20 +204,28 @@ public class ApplicationServeur {
      * @throws InvocationTargetException
      */
     public void traiterEcriture(Object pointeurObjet, String attribut, Object valeur) throws IllegalArgumentException, IllegalAccessException, InvocationTargetException {
+        //Chargement des méthodes et des attributs de la classe
         Method[] methodes = c.getMethods();
         Field[] champs = c.getDeclaredFields();
+        
+        //Recherche de l'attribut 
         for (Field champ : champs) {
             int mod = champ.getModifiers();
             if (champ.getName().equals(attribut)) {
                 if (Modifier.isPublic(mod)) {
+                    //on modifie directement la valeur de l'attribut de l'objet en paramètre
                     champ.set(pointeurObjet, valeur);
                 } else {
+                    //on créé une string de type set + nom de l'attribut
                     char[] char_table = attribut.toCharArray();
                     char_table[0] = Character.toUpperCase(char_table[0]);
                     String setter = new String(char_table);
                     setter = "set" + setter;
+                    
+                    //Recherche du setter dans les méthodes de la classe
                     for (Method m : methodes) {
                         if (m.getName().equals(setter)) {
+                            //Invocation du setter pour l'objet en paramètre
                             Object r = m.invoke(pointeurObjet, valeur);
                             resultat_commande = attribut + " modifié";
                         }
